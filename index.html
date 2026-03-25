@@ -29,7 +29,8 @@
   .desc { font-size: 14px; font-weight: 600; color: #1d1d1f; line-height: 1.4; margin-bottom: 10px; }
   .tags { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 10px; }
   .tag { display: inline-block; padding: 3px 10px; border-radius: 20px; font-size: 12px; font-weight: 500; }
-  .tag-obsah      { background: #f5f0ff; color: #6e2fcc; }
+  .tag-obsah      { background: #f5f0ff; color: #6e2fcc; cursor: pointer; }
+  .tag-obsah:hover { background: #e8d9ff; }
   .tag-druh       { background: #f0fff4; color: #1a7f37; font-style: italic; }
   .tag-vlastní    { background: #e8f4fd; color: #0071e3; }
   .tag-screenshot { background: #fff3cd; color: #856404; }
@@ -127,7 +128,7 @@ function cardHtml(r, i) {
   var gpsBanner = r.gps ? '<div class="gps-banner">📍 ' + esc(r.gps) + '</div>' : '';
 
   var tags = '';
-  if (r.obsah) tags += '<span class="tag tag-obsah">' + esc(r.obsah) + '</span>';
+  if (r.obsah) tags += '<span class="tag tag-obsah" onclick="filterByObsah(\'' + r.obsah.replace(/'/g,"\\'") + '\')" title="Filtrovat: ' + esc(r.obsah) + '">' + esc(r.obsah) + '</span>';
   if (r.druh && druhJistota(r.druh) >= 50 && PRIRODA_OBSAH.indexOf(r.obsah) >= 0) {
     tags += '<span class="tag tag-druh">🔬 ' + esc(r.druh) + '</span>';
   }
@@ -208,6 +209,12 @@ function rerenderCard(i) {
   var tmp=document.createElement('div');
   tmp.innerHTML=cardHtml(DATA[i],i);
   el.parentNode.replaceChild(tmp.firstChild,el);
+}
+
+function filterByObsah(obsah) {
+  document.getElementById('filObsah').value = obsah;
+  render();
+  window.scrollTo({top: 0, behavior: 'smooth'});
 }
 
 function render() {
