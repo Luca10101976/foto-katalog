@@ -226,7 +226,9 @@ function render() {
   var filObs   = document.getElementById('filObsah').value;
   var filGps   = document.getElementById('filGps').value;
   var filZdroj = document.getElementById('filZdroj').value;
-  var html='', count=0;
+
+  // Filtrování
+  var filtered = [];
   for(var i=0;i<DATA.length;i++) {
     var r=DATA[i];
     if(filObs   && r.obsah!==filObs) continue;
@@ -237,9 +239,22 @@ function render() {
       var hay=[r.popis,r.kat,r.obsah,r.gps,r.druh,r.nazev,r.zdroj].join(' ').toLowerCase();
       if(hay.indexOf(q)===-1) continue;
     }
-    html+=cardHtml(r,i); count++;
+    filtered.push(i);
   }
-  document.getElementById('count').textContent=count+' fotek';
+
+  // Řazení: fotky s GPS lokací vždy první
+  filtered.sort(function(a, b) {
+    var aGps = DATA[a].gps ? 1 : 0;
+    var bGps = DATA[b].gps ? 1 : 0;
+    return bGps - aGps;
+  });
+
+  var html='';
+  for(var j=0;j<filtered.length;j++) {
+    html+=cardHtml(DATA[filtered[j]], filtered[j]);
+  }
+
+  document.getElementById('count').textContent=filtered.length+' fotek';
   document.getElementById('grid').innerHTML=html||'<div class="empty">🔍 Nic nenalezeno</div>';
 }
 
