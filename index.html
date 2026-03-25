@@ -192,27 +192,14 @@ function saveEdit(i) {
     zdroj: document.getElementById('e-zdroj-'+i).value,
     nazev: document.getElementById('e-nazev-'+i).value
   };
-  fetch('/api/save', {
-    method: 'POST',
-    headers: {'Content-Type': 'application/json'},
-    body: JSON.stringify(nd)
-  })
-  .then(function(res) { return res.json(); })
-  .then(function(data) {
-    if (data.ok) {
-      Object.assign(DATA[i], nd);
-      btn.disabled=false; btn.textContent='💾 Uložit';
-      document.getElementById('msg-'+i).style.display='block';
-      setTimeout(function() { cancelEdit(i); rerenderCard(i); }, 1200);
-    } else {
-      throw new Error(data.error || 'Chyba');
-    }
-  })
-  .catch(function(e) {
-    btn.disabled=false; btn.textContent='💾 Uložit';
-    var el=document.getElementById('err-'+i);
-    el.style.display='block'; el.textContent='❌ '+e.message;
-  });
+  var SAVE_URL = 'https://script.google.com/macros/s/AKfycbzOYTX0w_1W7CBWS1ibGoqMzjnE89iKMazJz72SmfKuSpCE_R9mDLK5AeB4LJd4t9HS/exec';
+  var blob = new Blob([JSON.stringify(nd)], {type: 'text/plain'});
+  navigator.sendBeacon(SAVE_URL, blob);
+  // sendBeacon je fire-and-forget — ukážeme úspěch okamžitě
+  Object.assign(DATA[i], nd);
+  btn.disabled=false; btn.textContent='💾 Uložit';
+  document.getElementById('msg-'+i).style.display='block';
+  setTimeout(function() { cancelEdit(i); rerenderCard(i); }, 1200);
 }
 
 function rerenderCard(i) {
