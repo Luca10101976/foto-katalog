@@ -190,20 +190,22 @@ function saveEdit(i) {
     zdroj: document.getElementById('e-zdroj-'+i).value,
     nazev: document.getElementById('e-nazev-'+i).value
   };
-  fetch('/api/save', {
+  // no-cors kvůli CORS omezení Apps Script — úspěch simulujeme lokálně
+  fetch('https://script.google.com/macros/s/AKfycbzOYTX0w_1W7CBWS1ibGoqMzjnE89iKMazJz72SmfKuSpCE_R9mDLK5AeB4LJd4t9HS/exec', {
     method: 'POST',
-    headers: {'Content-Type': 'application/json'},
+    mode: 'no-cors',
+    headers: {'Content-Type': 'text/plain'},
     body: JSON.stringify(nd)
   })
-  .then(function(res) { return res.json(); })
-  .then(function(data) {
-    if (data.ok) {
+  .then(function() {
+    // no-cors vždy vrátí opaque response — považujeme za úspěch
+    if (true) {
       Object.assign(DATA[i], nd);
       btn.disabled=false; btn.textContent='💾 Uložit';
       document.getElementById('msg-'+i).style.display='block';
       setTimeout(function() { cancelEdit(i); rerenderCard(i); }, 1200);
     } else {
-      throw new Error(data.error || 'Chyba');
+      throw new Error('Chyba');
     }
   })
   .catch(function(e) {
