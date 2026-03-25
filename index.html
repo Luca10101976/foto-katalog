@@ -134,8 +134,12 @@ function cardHtml(r, i) {
   var zdroj = r.zdroj || 'neznámý';
   tags += '<span class="tag tag-' + esc(zdroj) + '">' + (ZDROJ_ICON[zdroj]||'❓') + ' ' + esc(zdroj) + '</span>';
 
-  var katOpts = KAT_OPTIONS.map(function(k) {
-    return '<option value="' + k + '"' + (r.kat===k?' selected':'') + '>' + k + '</option>';
+  var OBSAH_OPTIONS = ['Moře / Pobřeží','Vodopád','Řeka / Jezero','Hory / Krajina',
+    'Příroda / Rostliny','Mořský život','Zvíře','Původní obyvatelé',
+    'Lidé — portréty','Lidé','Jídlo / Trh','Památky / Ruiny',
+    'Město / Architektura','Loď / Plavba','Mapa / Dokument','Ostatní'];
+  var obsahOpts = OBSAH_OPTIONS.map(function(o) {
+    return '<option value="' + o + '"' + (r.obsah===o?' selected':'') + '>' + o + '</option>';
   }).join('');
   var zdrojOpts = ['vlastní','screenshot','stažená','neznámý'].map(function(z) {
     return '<option value="' + z + '"' + (zdroj===z?' selected':'') + '>' + (ZDROJ_ICON[z]||'❓') + ' ' + z + '</option>';
@@ -154,8 +158,7 @@ function cardHtml(r, i) {
     + '</div></div>'
     + '<div class="edit-mode">'
     + '<label>Popis</label><textarea id="e-popis-' + i + '">' + esc(r.popis||'') + '</textarea>'
-    + '<label>Kategorie</label><select id="e-kat-' + i + '">' + katOpts + '</select>'
-    + '<label>Obsah / typ</label><input type="text" id="e-obsah-' + i + '" value="' + esc(r.obsah||'') + '">'
+    + '<label>Typ obsahu</label><select id="e-obsah-' + i + '">' + obsahOpts + '</select>'
     + '<label>GPS místo</label><input type="text" id="e-gps-' + i + '" value="' + esc(r.gps||'') + '">'
     + '<label>Druh (rostlina / zvíře)</label><input type="text" id="e-druh-' + i + '" value="' + esc(r.druh||'') + '">'
     + '<label>Zdroj</label><select id="e-zdroj-' + i + '">' + zdrojOpts + '</select>'
@@ -183,7 +186,6 @@ function saveEdit(i) {
   var nd = {
     id:    r.id,
     popis: document.getElementById('e-popis-'+i).value,
-    kat:   document.getElementById('e-kat-'+i).value,
     obsah: document.getElementById('e-obsah-'+i).value,
     gps:   document.getElementById('e-gps-'+i).value,
     druh:  document.getElementById('e-druh-'+i).value,
