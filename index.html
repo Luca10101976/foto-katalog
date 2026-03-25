@@ -259,7 +259,7 @@ function init(data) {
   render();
 }
 
-fetch('/katalog_data.json')
+fetch('katalog_data.json')
   .then(function(r){ return r.json(); })
   .then(init)
   .catch(function(e){
