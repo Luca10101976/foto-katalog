@@ -1,0 +1,7 @@
+{
+  "rewrites": [
+    { "source": "/katalog_data.json", "destination": "/katalog_data.json" },
+    { "source": "/api/(.*)", "destination": "/api/$1" },
+    { "source": "/(.*)", "destination": "/index.html" }
+  ]
+}

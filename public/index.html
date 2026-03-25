@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Katalog fotek — Martin Guía</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #f5f5f7; color: #1d1d1f; }
+  .header { background: #1d1d1f; color: white; padding: 24px 32px; }
+  .header h1 { font-size: 24px; font-weight: 700; }
+  .header p { color: #a1a1a6; font-size: 14px; margin-top: 4px; }
+  .controls { background: white; padding: 14px 32px; border-bottom: 1px solid #e5e5ea; display: flex; gap: 10px; align-items: center; flex-wrap: wrap; position: sticky; top: 0; z-index: 10; box-shadow: 0 1px 4px rgba(0,0,0,0.08); }
+  .search-wrap { position: relative; flex: 1; min-width: 180px; }
+  .search-wrap input { width: 100%; padding: 9px 12px 9px 36px; border: 1px solid #d2d2d7; border-radius: 10px; font-size: 14px; outline: none; }
+  .search-wrap input:focus { border-color: #0071e3; }
+  .search-wrap::before { content: '🔍'; position: absolute; left: 10px; top: 50%; transform: translateY(-50%); font-size: 14px; }
+  select { padding: 9px 12px; border: 1px solid #d2d2d7; border-radius: 10px; font-size: 14px; background: white; outline: none; cursor: pointer; }
+  select:focus { border-color: #0071e3; }
+  .count { margin-left: auto; font-size: 13px; color: #6e6e73; white-space: nowrap; font-weight: 600; }
+  .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 20px; padding: 24px 32px; }
+  .card { background: white; border-radius: 16px; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.08); transition: transform 0.2s, box-shadow 0.2s; }
+  .card:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(0,0,0,0.12); }
+  .card.editing { box-shadow: 0 0 0 3px #0071e3, 0 8px 24px rgba(0,0,0,0.15); transform: none; }
+  .thumb { width: 100%; height: 200px; object-fit: cover; background: #f0f0f0; display: block; }
+  .thumb-placeholder { width: 100%; height: 200px; background: #f0f0f0; display: flex; align-items: center; justify-content: center; font-size: 48px; }
+  .gps-banner { background: linear-gradient(135deg, #ff3b30, #ff6b35); color: white; padding: 8px 16px; font-size: 13px; font-weight: 600; display: flex; align-items: center; gap: 6px; }
+  .card-body { padding: 14px 16px 16px; }
+  .desc { font-size: 14px; font-weight: 600; color: #1d1d1f; line-height: 1.4; margin-bottom: 10px; }
+  .tags { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 10px; }
+  .tag { display: inline-block; padding: 3px 10px; border-radius: 20px; font-size: 12px; font-weight: 500; }
+  .tag-obsah      { background: #f5f0ff; color: #6e2fcc; }
+  .tag-druh       { background: #f0fff4; color: #1a7f37; font-style: italic; }
+  .tag-vlastní    { background: #e8f4fd; color: #0071e3; }
+  .tag-screenshot { background: #fff3cd; color: #856404; }
+  .tag-stažená    { background: #fde8e8; color: #cc2900; }
+  .tag-neznámý    { background: #f0f0f5; color: #6e6e73; }
+  .meta { font-size: 12px; color: #8e8e93; margin-bottom: 12px; word-break: break-all; }
+  .edit-mode { display: none; }
+  .card.editing .view-mode { display: none; }
+  .card.editing .edit-mode { display: block; }
+  .edit-mode label { display: block; font-size: 12px; font-weight: 600; color: #6e6e73; margin-bottom: 3px; margin-top: 10px; }
+  .edit-mode label:first-child { margin-top: 0; }
+  .edit-mode input, .edit-mode select, .edit-mode textarea { width: 100%; padding: 7px 10px; border: 1px solid #d2d2d7; border-radius: 8px; font-size: 13px; font-family: inherit; outline: none; background: #fafafa; }
+  .edit-mode input:focus, .edit-mode select:focus, .edit-mode textarea:focus { border-color: #0071e3; background: white; }
+  .edit-mode textarea { resize: vertical; min-height: 60px; }
+  .btns { display: flex; gap: 8px; margin-top: 12px; }
+  .btn-open { flex: 1; background: #0071e3; color: white; border: none; padding: 9px 14px; border-radius: 10px; font-size: 13px; font-weight: 600; cursor: pointer; text-decoration: none; display: flex; align-items: center; justify-content: center; gap: 6px; }
+  .btn-open:hover { background: #005bbf; }
+  .btn-edit { background: #f0f0f5; color: #1d1d1f; border: none; padding: 9px 12px; border-radius: 10px; font-size: 14px; cursor: pointer; }
+  .btn-edit:hover { background: #e5e5ea; }
+  .btn-save { flex: 1; background: #34c759; color: white; border: none; padding: 9px 14px; border-radius: 10px; font-size: 13px; font-weight: 600; cursor: pointer; }
+  .btn-save:hover { background: #28a745; }
+  .btn-save:disabled { background: #a1a1a6; cursor: not-allowed; }
+  .btn-cancel { background: #f0f0f5; color: #1d1d1f; border: none; padding: 9px 12px; border-radius: 10px; font-size: 13px; font-weight: 600; cursor: pointer; }
+  .btn-cancel:hover { background: #e5e5ea; }
+  .save-msg { font-size: 12px; color: #34c759; margin-top: 6px; text-align: center; display: none; }
+  .save-err { font-size: 12px; color: #ff3b30; margin-top: 6px; text-align: center; display: none; }
+  .loading { text-align: center; padding: 80px; font-size: 18px; color: #6e6e73; }
+  .empty { text-align: center; padding: 80px; font-size: 16px; color: #6e6e73; }
+  @media (max-width: 600px) {
+    .controls { padding: 12px 16px; }
+    .grid { padding: 16px; gap: 14px; }
+    .header { padding: 16px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <h1>📷 Katalog fotek — Martin Guía</h1>
+  <p id="subtitle">Načítám…</p>
+</div>
+
+<div class="controls">
+  <div class="search-wrap">
+    <input type="text" id="search" placeholder="Hledat…" oninput="render()">
+  </div>
+  <select id="filObsah" onchange="render()">
+    <option value="">Vše — obsah</option>
+  </select>
+  <select id="filGps" onchange="render()">
+    <option value="">📍 Všechna místa</option>
+    <option value="ano">📍 Má GPS lokaci</option>
+    <option value="ne">Bez GPS</option>
+  </select>
+  <select id="filZdroj" onchange="render()">
+    <option value="">Všechny zdroje</option>
+    <option value="vlastní">📱 Vlastní fotky</option>
+    <option value="screenshot">🖥️ Screenshoty</option>
+    <option value="stažená">🌐 Stažené</option>
+    <option value="neznámý">❓ Neznámý</option>
+  </select>
+  <span class="count" id="count"></span>
+</div>
+
+<div id="grid" class="grid">
+  <div class="loading">⏳ Načítám katalog…</div>
+</div>
+
+<script>
+var DATA = [];
+var KAT_OPTIONS = ['Lidé','Příroda','Architektura','Ostatní'];
+var ZDROJ_ICON = {'vlastní':'📱','screenshot':'🖥️','stažená':'🌐','neznámý':'❓'};
+var PRIRODA_OBSAH = ['Zvíře','Mořský život','Příroda / Rostliny','Vodopád','Hory / Krajina'];
+// Apps Script URL pro ukládání editací
+var SAVE_URL = 'APPS_SCRIPT_URL_ZDE';
+
+function esc(s) {
+  return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+function druhJistota(druh) {
+  if (!druh) return 0;
+  var m = druh.match(/\((\d+\.?\d*)%\)/);
+  return m ? parseFloat(m[1]) : 0;
+}
+
+function cardHtml(r, i) {
+  var thumbUrl = r.id ? 'https://drive.google.com/thumbnail?id=' + r.id + '&sz=w400' : '';
+  var fileUrl  = r.id ? 'https://drive.google.com/file/d/' + r.id + '/view' : '#';
+
+  var thumbHtml = thumbUrl
+    ? '<img class="thumb" src="' + thumbUrl + '" alt="" loading="lazy" onerror="this.parentNode.innerHTML=\'<div class=\\\'thumb-placeholder\\\'>🖼️</div>\'">'
+    : '<div class="thumb-placeholder">🖼️</div>';
+
+  var gpsBanner = r.gps ? '<div class="gps-banner">📍 ' + esc(r.gps) + '</div>' : '';
+
+  var tags = '';
+  if (r.obsah) tags += '<span class="tag tag-obsah">' + esc(r.obsah) + '</span>';
+  if (r.druh && druhJistota(r.druh) >= 50 && PRIRODA_OBSAH.indexOf(r.obsah) >= 0) {
+    tags += '<span class="tag tag-druh">🔬 ' + esc(r.druh) + '</span>';
+  }
+  var zdroj = r.zdroj || 'neznámý';
+  tags += '<span class="tag tag-' + esc(zdroj) + '">' + (ZDROJ_ICON[zdroj]||'❓') + ' ' + esc(zdroj) + '</span>';
+
+  var katOpts = KAT_OPTIONS.map(function(k) {
+    return '<option value="' + k + '"' + (r.kat===k?' selected':'') + '>' + k + '</option>';
+  }).join('');
+  var zdrojOpts = ['vlastní','screenshot','stažená','neznámý'].map(function(z) {
+    return '<option value="' + z + '"' + (zdroj===z?' selected':'') + '>' + (ZDROJ_ICON[z]||'❓') + ' ' + z + '</option>';
+  }).join('');
+
+  return '<div class="card" id="card-' + i + '">'
+    + thumbHtml + gpsBanner
+    + '<div class="card-body">'
+    + '<div class="view-mode">'
+    + '<div class="desc">' + esc(r.popis||'—') + '</div>'
+    + '<div class="tags">' + tags + '</div>'
+    + (r.nazev ? '<div class="meta">📄 ' + esc(r.nazev) + '</div>' : '')
+    + '<div class="btns">'
+    + '<a class="btn-open" href="' + fileUrl + '" target="_blank">🔍 Otevřít fotku</a>'
+    + '<button class="btn-edit" onclick="startEdit(' + i + ')">✏️</button>'
+    + '</div></div>'
+    + '<div class="edit-mode">'
+    + '<label>Popis</label><textarea id="e-popis-' + i + '">' + esc(r.popis||'') + '</textarea>'
+    + '<label>Kategorie</label><select id="e-kat-' + i + '">' + katOpts + '</select>'
+    + '<label>Obsah / typ</label><input type="text" id="e-obsah-' + i + '" value="' + esc(r.obsah||'') + '">'
+    + '<label>GPS místo</label><input type="text" id="e-gps-' + i + '" value="' + esc(r.gps||'') + '">'
+    + '<label>Druh (rostlina / zvíře)</label><input type="text" id="e-druh-' + i + '" value="' + esc(r.druh||'') + '">'
+    + '<label>Zdroj</label><select id="e-zdroj-' + i + '">' + zdrojOpts + '</select>'
+    + '<label>Název souboru</label><input type="text" id="e-nazev-' + i + '" value="' + esc(r.nazev||'') + '">'
+    + '<div class="btns">'
+    + '<button class="btn-save" id="btn-save-' + i + '" onclick="saveEdit(' + i + ')">💾 Uložit</button>'
+    + '<button class="btn-cancel" onclick="cancelEdit(' + i + ')">Zrušit</button>'
+    + '</div>'
+    + '<div class="save-msg" id="msg-' + i + '">✅ Uloženo!</div>'
+    + '<div class="save-err" id="err-' + i + '"></div>'
+    + '</div></div></div>';
+}
+
+function startEdit(i)  { document.getElementById('card-'+i).classList.add('editing'); }
+function cancelEdit(i) {
+  document.getElementById('card-'+i).classList.remove('editing');
+  document.getElementById('msg-'+i).style.display='none';
+  document.getElementById('err-'+i).style.display='none';
+}
+
+function saveEdit(i) {
+  var r = DATA[i];
+  var btn = document.getElementById('btn-save-'+i);
+  btn.disabled=true; btn.textContent='⏳ Ukládám…';
+  var nd = {
+    id:    r.id,
+    popis: document.getElementById('e-popis-'+i).value,
+    kat:   document.getElementById('e-kat-'+i).value,
+    obsah: document.getElementById('e-obsah-'+i).value,
+    gps:   document.getElementById('e-gps-'+i).value,
+    druh:  document.getElementById('e-druh-'+i).value,
+    zdroj: document.getElementById('e-zdroj-'+i).value,
+    nazev: document.getElementById('e-nazev-'+i).value
+  };
+  fetch('/api/save', {
+    method: 'POST',
+    headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify(nd)
+  })
+  .then(function(res) { return res.json(); })
+  .then(function(data) {
+    if (data.ok) {
+      Object.assign(DATA[i], nd);
+      btn.disabled=false; btn.textContent='💾 Uložit';
+      document.getElementById('msg-'+i).style.display='block';
+      setTimeout(function() { cancelEdit(i); rerenderCard(i); }, 1200);
+    } else {
+      throw new Error(data.error || 'Chyba');
+    }
+  })
+  .catch(function(e) {
+    btn.disabled=false; btn.textContent='💾 Uložit';
+    var el=document.getElementById('err-'+i);
+    el.style.display='block'; el.textContent='❌ '+e.message;
+  });
+}
+
+function rerenderCard(i) {
+  var el=document.getElementById('card-'+i);
+  if(!el) return;
+  var tmp=document.createElement('div');
+  tmp.innerHTML=cardHtml(DATA[i],i);
+  el.parentNode.replaceChild(tmp.firstChild,el);
+}
+
+function render() {
+  var q        = document.getElementById('search').value.toLowerCase();
+  var filObs   = document.getElementById('filObsah').value;
+  var filGps   = document.getElementById('filGps').value;
+  var filZdroj = document.getElementById('filZdroj').value;
+  var html='', count=0;
+  for(var i=0;i<DATA.length;i++) {
+    var r=DATA[i];
+    if(filObs   && r.obsah!==filObs) continue;
+    if(filGps==='ano' && !r.gps)     continue;
+    if(filGps==='ne'  && r.gps)      continue;
+    if(filZdroj && (r.zdroj||'neznámý')!==filZdroj) continue;
+    if(q) {
+      var hay=[r.popis,r.kat,r.obsah,r.gps,r.druh,r.nazev,r.zdroj].join(' ').toLowerCase();
+      if(hay.indexOf(q)===-1) continue;
+    }
+    html+=cardHtml(r,i); count++;
+  }
+  document.getElementById('count').textContent=count+' fotek';
+  document.getElementById('grid').innerHTML=html||'<div class="empty">🔍 Nic nenalezeno</div>';
+}
+
+function init(data) {
+  DATA = data;
+  var obsahSet={};
+  for(var i=0;i<DATA.length;i++) if(DATA[i].obsah) obsahSet[DATA[i].obsah]=1;
+  var sel=document.getElementById('filObsah');
+  Object.keys(obsahSet).sort().forEach(function(o){
+    var opt=document.createElement('option'); opt.value=o; opt.textContent=o; sel.appendChild(opt);
+  });
+  document.getElementById('subtitle').textContent=DATA.length+' fotek · AI katalogizace';
+  render();
+}
+
+fetch('/katalog_data.json')
+  .then(function(r){ return r.json(); })
+  .then(init)
+  .catch(function(e){
+    document.getElementById('grid').innerHTML='<div class="empty">❌ Chyba načítání dat: '+e.message+'</div>';
+  });
+</script>
+</body>
+</html>
