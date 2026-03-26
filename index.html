@@ -149,8 +149,8 @@ function cardHtml(r, i) {
     ? '<img class="thumb" src="' + thumbUrl + '" alt="" loading="lazy" onerror="this.parentNode.innerHTML=\'<div class=\\\'thumb-placeholder\\\'>🖼️</div>\'">'
     : '<div class="thumb-placeholder">🖼️</div>';
 
-  var gpsLabel = r.gps ? (GPS_NAZVY[r.gps] || r.gps) : '';
-  var gpsBanner = r.gps ? '<div class="gps-banner">📍 ' + esc(gpsLabel) + '</div>' : '';
+  var gpsLabel = r.misto || (r.gps ? (GPS_NAZVY[r.gps] || r.gps) : '');
+  var gpsBanner = gpsLabel ? '<div class="gps-banner">📍 ' + esc(gpsLabel) + '</div>' : '';
 
   var tags = '';
   if (r.obsah) tags += '<span class="tag tag-obsah" onclick="filterByObsah(\'' + r.obsah.replace(/'/g,"\\'") + '\')" title="Filtrovat: ' + esc(r.obsah) + '">' + esc(r.obsah) + '</span>';
