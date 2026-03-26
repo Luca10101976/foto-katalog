@@ -125,7 +125,29 @@ function cardHtml(r, i) {
     ? '<img class="thumb" src="' + thumbUrl + '" alt="" loading="lazy" onerror="this.parentNode.innerHTML=\'<div class=\\\'thumb-placeholder\\\'>🖼️</div>\'">'
     : '<div class="thumb-placeholder">🖼️</div>';
 
-  var gpsBanner = r.gps ? '<div class="gps-banner">📍 ' + esc(r.gps) + '</div>' : '';
+  var GPS_NAZVY = {
+    '9.748900,-83.753400': 'Kostarika',
+    '9.838900,-83.931700': 'Sanatorio Durán, Kostarika',
+    '10.531800,-83.502200': 'Tortuguero, Kostarika',
+    '9.928100,-84.090700': 'San José, Kostarika',
+    '9.990800,-83.036500': 'Limón, Kostarika',
+    '9.900800,-83.680800': 'Turrialba, Kostarika',
+    '9.990800,-83.781700': 'Vulkán Turrialba, Kostarika',
+    '10.158300,-84.691700': 'Vodopády Las Trilizas, Kostarika',
+    '10.500000,-85.633300': 'Sardinal, Kostarika',
+    '9.633300,-82.833300': 'Bribri, Kostarika',
+    '5.526700,-87.061100': 'Kokosový ostrov, Kostarika',
+    '8.683300,-82.050000': 'Hornito, Panama',
+    '8.050000,-77.700000': 'Playa Muerto, Darién, Panama',
+    '8.993600,-79.519700': 'Panama City, Panama',
+    '9.364700,-79.900300': 'Colón, Panama',
+    '9.583300,-78.966700': 'San Blas / Guna Yala, Panama',
+    '9.166700,-79.666700': 'Emberá, Panama',
+    '8.700000,-80.000000': 'El Níspero, Panama',
+    '9.557700,-79.651900': 'Portobelo, Panama',
+  };
+  var gpsLabel = r.gps ? (GPS_NAZVY[r.gps] || r.gps) : '';
+  var gpsBanner = r.gps ? '<div class="gps-banner">📍 ' + esc(gpsLabel) + '</div>' : '';
 
   var tags = '';
   if (r.obsah) tags += '<span class="tag tag-obsah" onclick="filterByObsah(\'' + r.obsah.replace(/'/g,"\\'") + '\')" title="Filtrovat: ' + esc(r.obsah) + '">' + esc(r.obsah) + '</span>';
