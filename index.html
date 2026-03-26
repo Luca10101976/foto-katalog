@@ -254,8 +254,8 @@ function render() {
   for(var i=0;i<DATA.length;i++) {
     var r=DATA[i];
     if(filObs   && r.obsah!==filObs) continue;
-    if(filGps==='ano' && !r.gps)     continue;
-    if(filGps==='ne'  && r.gps)      continue;
+    if(filGps==='ano' && !r.gps && !r.misto) continue;
+    if(filGps==='ne'  && (r.gps || r.misto)) continue;
     if(filZdroj && (r.zdroj||'neznámý')!==filZdroj) continue;
     if(filMisto && (r.misto||'') !== filMisto)        continue;
     if(q) {
