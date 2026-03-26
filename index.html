@@ -257,7 +257,7 @@ function render() {
     if(filGps==='ano' && !r.gps)     continue;
     if(filGps==='ne'  && r.gps)      continue;
     if(filZdroj && (r.zdroj||'neznámý')!==filZdroj) continue;
-    if(filMisto && GPS_NAZVY[r.gps] !== filMisto)   continue;
+    if(filMisto && (r.misto||'') !== filMisto)        continue;
     if(q) {
       var hay=[r.popis,r.kat,r.obsah,r.gps,r.druh,r.nazev,r.zdroj].join(' ').toLowerCase();
       if(hay.indexOf(q)===-1) continue;
@@ -295,7 +295,7 @@ function init(data) {
   // Místa dropdown — dynamicky z dat
   var mistaSet={};
   for(var i=0;i<DATA.length;i++){
-    var nazev = DATA[i].gps ? (GPS_NAZVY[DATA[i].gps] || null) : null;
+    var nazev = DATA[i].misto || null;
     if(nazev) mistaSet[nazev]=1;
   }
   var selMisto=document.getElementById('filMisto');
