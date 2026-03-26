@@ -87,29 +87,6 @@
   </select>
   <select id="filMisto" onchange="render()">
     <option value="">🌍 Všechna místa</option>
-    <optgroup label="🇵🇦 Panama">
-      <option value="Panama City, Panama">Panama City</option>
-      <option value="Colón, Panama">Colón</option>
-      <option value="San Blas / Guna Yala, Panama">San Blas / Guna Yala</option>
-      <option value="Portobelo, Panama">Portobelo</option>
-      <option value="Hornito, Panama">Hornito</option>
-      <option value="Playa Muerto, Darién, Panama">Playa Muerto, Darién</option>
-      <option value="Emberá, Panama">Emberá</option>
-      <option value="El Níspero, Panama">El Níspero</option>
-    </optgroup>
-    <optgroup label="🇨🇷 Kostarika">
-      <option value="Kostarika">Kostarika (obecně)</option>
-      <option value="San José, Kostarika">San José</option>
-      <option value="Tortuguero, Kostarika">Tortuguero</option>
-      <option value="Limón, Kostarika">Limón</option>
-      <option value="Turrialba, Kostarika">Turrialba</option>
-      <option value="Vulkán Turrialba, Kostarika">Vulkán Turrialba</option>
-      <option value="Sanatorio Durán, Kostarika">Sanatorio Durán</option>
-      <option value="Sardinal, Kostarika">Sardinal</option>
-      <option value="Bribri, Kostarika">Bribri</option>
-      <option value="Vodopády Las Trilizas, Kostarika">Vodopády Las Trilizas</option>
-      <option value="Kokosový ostrov, Kostarika">Kokosový ostrov</option>
-    </optgroup>
   </select>
   <select id="filZdroj" onchange="render()">
     <option value="">Všechny zdroje</option>
@@ -306,12 +283,40 @@ function render() {
 
 function init(data) {
   DATA = data;
+
+  // Obsah dropdown
   var obsahSet={};
   for(var i=0;i<DATA.length;i++) if(DATA[i].obsah) obsahSet[DATA[i].obsah]=1;
-  var sel=document.getElementById('filObsah');
+  var selObs=document.getElementById('filObsah');
   Object.keys(obsahSet).sort().forEach(function(o){
-    var opt=document.createElement('option'); opt.value=o; opt.textContent=o; sel.appendChild(opt);
+    var opt=document.createElement('option'); opt.value=o; opt.textContent=o; selObs.appendChild(opt);
   });
+
+  // Místa dropdown — dynamicky z dat
+  var mistaSet={};
+  for(var i=0;i<DATA.length;i++){
+    var nazev = DATA[i].gps ? (GPS_NAZVY[DATA[i].gps] || null) : null;
+    if(nazev) mistaSet[nazev]=1;
+  }
+  var selMisto=document.getElementById('filMisto');
+  var panama=[], kostarika=[], ostatni=[];
+  Object.keys(mistaSet).sort().forEach(function(m){
+    if(m.indexOf('Panama')>-1) panama.push(m);
+    else if(m.indexOf('Kostarika')>-1) kostarika.push(m);
+    else ostatni.push(m);
+  });
+  function addGroup(label, items){
+    if(!items.length) return;
+    var g=document.createElement('optgroup'); g.label=label;
+    items.forEach(function(m){
+      var opt=document.createElement('option'); opt.value=m; opt.textContent=m.replace(', Panama','').replace(', Kostarika',''); g.appendChild(opt);
+    });
+    selMisto.appendChild(g);
+  }
+  addGroup('🇵🇦 Panama', panama);
+  addGroup('🇨🇷 Kostarika', kostarika);
+  addGroup('🌍 Ostatní', ostatni);
+
   document.getElementById('subtitle').textContent=DATA.length+' fotek · AI katalogizace';
   render();
 }
