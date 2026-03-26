@@ -59,6 +59,11 @@
   .save-err { font-size: 12px; color: #ff3b30; margin-top: 6px; text-align: center; display: none; }
   .loading { text-align: center; padding: 80px; font-size: 18px; color: #6e6e73; }
   .empty { text-align: center; padding: 80px; font-size: 16px; color: #6e6e73; }
+  .pagination { display: flex; align-items: center; justify-content: center; gap: 10px; padding: 24px 32px; }
+  .btn-page { background: white; border: 1px solid #d2d2d7; border-radius: 10px; padding: 8px 18px; font-size: 14px; font-weight: 600; cursor: pointer; color: #1d1d1f; }
+  .btn-page:hover:not(:disabled) { background: #f0f0f5; }
+  .btn-page:disabled { opacity: 0.35; cursor: not-allowed; }
+  .page-info { font-size: 13px; color: #6e6e73; min-width: 120px; text-align: center; }
   @media (max-width: 600px) {
     .controls { padding: 12px 16px; }
     .grid { padding: 16px; gap: 14px; }
@@ -101,9 +106,17 @@
 <div id="grid" class="grid">
   <div class="loading">⏳ Načítám katalog…</div>
 </div>
+<div class="pagination" id="pagination" style="display:none">
+  <button class="btn-page" id="btn-prev" onclick="changePage(-1)">← Předchozí</button>
+  <span class="page-info" id="page-info"></span>
+  <button class="btn-page" id="btn-next" onclick="changePage(1)">Další →</button>
+</div>
 
 <script>
 var DATA = [];
+var FILTERED = [];
+var PAGE = 0;
+var PAGE_SIZE = 48;
 var KAT_OPTIONS = ['Lidé','Příroda','Architektura','Ostatní'];
 var ZDROJ_ICON = {'vlastní':'📱','screenshot':'🖥️','stažená':'🌐','neznámý':'❓'};
 var GPS_NAZVY = {
@@ -250,7 +263,7 @@ function render() {
   var filMisto = document.getElementById('filMisto').value;
 
   // Filtrování
-  var filtered = [];
+  FILTERED = [];
   for(var i=0;i<DATA.length;i++) {
     var r=DATA[i];
     if(filObs   && r.obsah!==filObs) continue;
@@ -262,23 +275,49 @@ function render() {
       var hay=[r.popis,r.kat,r.obsah,r.gps,r.druh,r.nazev,r.zdroj].join(' ').toLowerCase();
       if(hay.indexOf(q)===-1) continue;
     }
-    filtered.push(i);
+    FILTERED.push(i);
   }
 
   // Řazení: fotky s GPS lokací vždy první
-  filtered.sort(function(a, b) {
+  FILTERED.sort(function(a, b) {
     var aGps = DATA[a].gps ? 1 : 0;
     var bGps = DATA[b].gps ? 1 : 0;
     return bGps - aGps;
   });
 
-  var html='';
-  for(var j=0;j<filtered.length;j++) {
-    html+=cardHtml(DATA[filtered[j]], filtered[j]);
+  PAGE = 0;
+  renderPage();
+}
+
+function renderPage() {
+  var total = FILTERED.length;
+  var totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE));
+  var start = PAGE * PAGE_SIZE;
+  var end = Math.min(start + PAGE_SIZE, total);
+  var pageItems = FILTERED.slice(start, end);
+
+  var html = '';
+  for(var j = 0; j < pageItems.length; j++) {
+    html += cardHtml(DATA[pageItems[j]], pageItems[j]);
   }
 
-  document.getElementById('count').textContent=filtered.length+' fotek';
-  document.getElementById('grid').innerHTML=html||'<div class="empty">🔍 Nic nenalezeno</div>';
+  document.getElementById('count').textContent = total + ' fotek';
+  document.getElementById('grid').innerHTML = html || '<div class="empty">🔍 Nic nenalezeno</div>';
+
+  // Pagination
+  var pag = document.getElementById('pagination');
+  pag.style.display = totalPages > 1 ? 'flex' : 'none';
+  document.getElementById('btn-prev').disabled = PAGE === 0;
+  document.getElementById('btn-next').disabled = PAGE >= totalPages - 1;
+  document.getElementById('page-info').textContent = 'Strana ' + (PAGE+1) + ' / ' + totalPages;
+
+  window.scrollTo({top: 0, behavior: 'smooth'});
+}
+
+function changePage(dir) {
+  var totalPages = Math.ceil(FILTERED.length / PAGE_SIZE);
+  PAGE = Math.max(0, Math.min(PAGE + dir, totalPages - 1));
+  renderPage();
 }
 
 function init(data) {
