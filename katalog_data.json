@@ -38111,5 +38111,49 @@
     "zdroj": "vlastní",
     "heic": false,
     "misto": "Senidub, Panama"
+  },
+  {
+    "id": "15Mq1c7rsgC1cQpghTQLtpzOI5hnPtQez",
+    "popis": "Muž sedí na písčité pláži před tradičními chýšemi s palmovými střechami. V pozadí jsou exotické palmy a modré nebe.",
+    "kat": "Senidub",
+    "obsah": "Lidé",
+    "gps": "9.572256,-78.877364",
+    "druh": null,
+    "nazev": "Senidub evelyn 2.jpg",
+    "zdroj": "vlastní",
+    "heic": false
+  },
+  {
+    "id": "1hbl8h5mJOb3lZEji0-uKhGCMEcYlyenc",
+    "popis": "Tradiční palapa s palmovým střechem stojící na písčité pláži při moři. Před chatou roste keř se žlutými květy a palmy, v pozadí je vidět modrý oceán a čistá obloha.",
+    "kat": "Senidub",
+    "obsah": "Moře / Pobřeží",
+    "gps": "9.480505,-78.850465",
+    "druh": null,
+    "nazev": "Senidub ubytování.9.jpg",
+    "zdroj": "vlastní",
+    "heic": false
+  },
+  {
+    "id": "1A4DJprasFXMolKdAeki8S4gCE1TL2vAo",
+    "popis": "Tradiční chata s doškou střechou obklopená vysokými kokosovými palmami v tropickém prostředí. Dům má modré dveře a dřevěné stěny, v okolí je písčitá půda a zelená tráva.",
+    "kat": "Senidub",
+    "obsah": "Město / Architektura",
+    "gps": "9.480678,-78.849998",
+    "druh": null,
+    "nazev": "Senidub ubytování.11.jpg",
+    "zdroj": "vlastní",
+    "heic": false
+  },
+  {
+    "id": "1oID8RLYlLG_FhEXekXrMY2wQ5gyHchyp",
+    "popis": "Pečená ryba podávaná na talíři s bílou rýží, červeným fazolím a pěkně upravenými zelenými saláty. Ryba je ozdobena kousky oranžové mrkve a podávaná na tradičně vzorovaném servírovacím prkně.",
+    "kat": "Senidub",
+    "obsah": "Jídlo / Trh",
+    "gps": "9.464369,-78.970008",
+    "druh": null,
+    "nazev": "Senidub jídlo.jpg",
+    "zdroj": "vlastní",
+    "heic": false
   }
 ]
