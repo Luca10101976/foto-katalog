@@ -85,6 +85,32 @@
     <option value="ano" selected>📍 Má GPS lokaci</option>
     <option value="ne">Bez GPS</option>
   </select>
+  <select id="filMisto" onchange="render()">
+    <option value="">🌍 Všechna místa</option>
+    <optgroup label="🇵🇦 Panama">
+      <option value="Panama City, Panama">Panama City</option>
+      <option value="Colón, Panama">Colón</option>
+      <option value="San Blas / Guna Yala, Panama">San Blas / Guna Yala</option>
+      <option value="Portobelo, Panama">Portobelo</option>
+      <option value="Hornito, Panama">Hornito</option>
+      <option value="Playa Muerto, Darién, Panama">Playa Muerto, Darién</option>
+      <option value="Emberá, Panama">Emberá</option>
+      <option value="El Níspero, Panama">El Níspero</option>
+    </optgroup>
+    <optgroup label="🇨🇷 Kostarika">
+      <option value="Kostarika">Kostarika (obecně)</option>
+      <option value="San José, Kostarika">San José</option>
+      <option value="Tortuguero, Kostarika">Tortuguero</option>
+      <option value="Limón, Kostarika">Limón</option>
+      <option value="Turrialba, Kostarika">Turrialba</option>
+      <option value="Vulkán Turrialba, Kostarika">Vulkán Turrialba</option>
+      <option value="Sanatorio Durán, Kostarika">Sanatorio Durán</option>
+      <option value="Sardinal, Kostarika">Sardinal</option>
+      <option value="Bribri, Kostarika">Bribri</option>
+      <option value="Vodopády Las Trilizas, Kostarika">Vodopády Las Trilizas</option>
+      <option value="Kokosový ostrov, Kostarika">Kokosový ostrov</option>
+    </optgroup>
+  </select>
   <select id="filZdroj" onchange="render()">
     <option value="">Všechny zdroje</option>
     <option value="vlastní">📱 Vlastní fotky</option>
@@ -103,6 +129,27 @@
 var DATA = [];
 var KAT_OPTIONS = ['Lidé','Příroda','Architektura','Ostatní'];
 var ZDROJ_ICON = {'vlastní':'📱','screenshot':'🖥️','stažená':'🌐','neznámý':'❓'};
+var GPS_NAZVY = {
+  '9.748900,-83.753400': 'Kostarika',
+  '9.838900,-83.931700': 'Sanatorio Durán, Kostarika',
+  '10.531800,-83.502200': 'Tortuguero, Kostarika',
+  '9.928100,-84.090700': 'San José, Kostarika',
+  '9.990800,-83.036500': 'Limón, Kostarika',
+  '9.900800,-83.680800': 'Turrialba, Kostarika',
+  '9.990800,-83.781700': 'Vulkán Turrialba, Kostarika',
+  '10.158300,-84.691700': 'Vodopády Las Trilizas, Kostarika',
+  '10.500000,-85.633300': 'Sardinal, Kostarika',
+  '9.633300,-82.833300': 'Bribri, Kostarika',
+  '5.526700,-87.061100': 'Kokosový ostrov, Kostarika',
+  '8.683300,-82.050000': 'Hornito, Panama',
+  '8.050000,-77.700000': 'Playa Muerto, Darién, Panama',
+  '8.993600,-79.519700': 'Panama City, Panama',
+  '9.364700,-79.900300': 'Colón, Panama',
+  '9.583300,-78.966700': 'San Blas / Guna Yala, Panama',
+  '9.166700,-79.666700': 'Emberá, Panama',
+  '8.700000,-80.000000': 'El Níspero, Panama',
+  '9.557700,-79.651900': 'Portobelo, Panama',
+};
 var PRIRODA_OBSAH = ['Zvíře','Mořský život','Příroda / Rostliny','Vodopád','Hory / Krajina'];
 // Apps Script URL pro ukládání editací
 var SAVE_URL = 'APPS_SCRIPT_URL_ZDE';
@@ -125,27 +172,6 @@ function cardHtml(r, i) {
     ? '<img class="thumb" src="' + thumbUrl + '" alt="" loading="lazy" onerror="this.parentNode.innerHTML=\'<div class=\\\'thumb-placeholder\\\'>🖼️</div>\'">'
     : '<div class="thumb-placeholder">🖼️</div>';
 
-  var GPS_NAZVY = {
-    '9.748900,-83.753400': 'Kostarika',
-    '9.838900,-83.931700': 'Sanatorio Durán, Kostarika',
-    '10.531800,-83.502200': 'Tortuguero, Kostarika',
-    '9.928100,-84.090700': 'San José, Kostarika',
-    '9.990800,-83.036500': 'Limón, Kostarika',
-    '9.900800,-83.680800': 'Turrialba, Kostarika',
-    '9.990800,-83.781700': 'Vulkán Turrialba, Kostarika',
-    '10.158300,-84.691700': 'Vodopády Las Trilizas, Kostarika',
-    '10.500000,-85.633300': 'Sardinal, Kostarika',
-    '9.633300,-82.833300': 'Bribri, Kostarika',
-    '5.526700,-87.061100': 'Kokosový ostrov, Kostarika',
-    '8.683300,-82.050000': 'Hornito, Panama',
-    '8.050000,-77.700000': 'Playa Muerto, Darién, Panama',
-    '8.993600,-79.519700': 'Panama City, Panama',
-    '9.364700,-79.900300': 'Colón, Panama',
-    '9.583300,-78.966700': 'San Blas / Guna Yala, Panama',
-    '9.166700,-79.666700': 'Emberá, Panama',
-    '8.700000,-80.000000': 'El Níspero, Panama',
-    '9.557700,-79.651900': 'Portobelo, Panama',
-  };
   var gpsLabel = r.gps ? (GPS_NAZVY[r.gps] || r.gps) : '';
   var gpsBanner = r.gps ? '<div class="gps-banner">📍 ' + esc(gpsLabel) + '</div>' : '';
 
@@ -244,6 +270,7 @@ function render() {
   var filObs   = document.getElementById('filObsah').value;
   var filGps   = document.getElementById('filGps').value;
   var filZdroj = document.getElementById('filZdroj').value;
+  var filMisto = document.getElementById('filMisto').value;
 
   // Filtrování
   var filtered = [];
@@ -253,6 +280,7 @@ function render() {
     if(filGps==='ano' && !r.gps)     continue;
     if(filGps==='ne'  && r.gps)      continue;
     if(filZdroj && (r.zdroj||'neznámý')!==filZdroj) continue;
+    if(filMisto && GPS_NAZVY[r.gps] !== filMisto)   continue;
     if(q) {
       var hay=[r.popis,r.kat,r.obsah,r.gps,r.druh,r.nazev,r.zdroj].join(' ').toLowerCase();
       if(hay.indexOf(q)===-1) continue;
