@@ -111,6 +111,13 @@
     <option value="stažená">🌐 Stažené</option>
     <option value="neznámý">❓ Neznámý</option>
   </select>
+  <select id="filOpravit" onchange="render()" style="border-color:#ff9500;">
+    <option value="">✅ Vše</option>
+    <option value="bez-lokace">📍 Bez lokace</option>
+    <option value="bez-popisu">📝 Bez popisu</option>
+    <option value="bez-obsahu">🏷️ Bez obsahu</option>
+    <option value="vse">🔧 Vše k opravě</option>
+  </select>
   <span class="count" id="count"></span>
 </div>
 
@@ -130,6 +137,7 @@ var PAGE = 0;
 var PAGE_SIZE = 48;
 var KAT_OPTIONS = ['Lidé','Příroda','Architektura','Ostatní'];
 var MISTO_OPTIONS = [];
+var MISTO_GPS = {};
 var ZDROJ_ICON = {'vlastní':'📱','screenshot':'🖥️','stažená':'🌐','neznámý':'❓'};
 var GPS_NAZVY = {
   '9.748900,-83.753400': 'Kostarika',
@@ -151,6 +159,7 @@ var GPS_NAZVY = {
   '9.166700,-79.666700': 'Emberá, Panama',
   '8.700000,-80.000000': 'El Níspero, Panama',
   '9.557700,-79.651900': 'Portobelo, Panama',
+  '8.578100,-80.139500': 'El Valle de Antón, Panama',
 };
 var PRIRODA_OBSAH = ['Zvíře','Mořský život','Příroda / Rostliny','Vodopád','Hory / Krajina'];
 // Apps Script URL pro ukládání editací
@@ -247,8 +256,8 @@ function saveEdit(i) {
     id:    r.id,
     popis: document.getElementById('e-popis-'+i).value,
     obsah: document.getElementById('e-obsah-'+i).value,
-    gps:   r.gps || '',
     misto: document.getElementById('e-misto-'+i).value,
+    gps:   (function(){ var m=document.getElementById('e-misto-'+i).value; return MISTO_GPS[m] || r.gps || ''; })(),
     druh:  document.getElementById('e-druh-'+i).value,
     zdroj: document.getElementById('e-zdroj-'+i).value,
     nazev: document.getElementById('e-nazev-'+i).value
@@ -283,7 +292,8 @@ function render() {
   var filGps   = document.getElementById('filGps').value;
   var filZdroj = document.getElementById('filZdroj').value;
   var filMisto = document.getElementById('filMisto').value;
-  var filTyp   = document.getElementById('filTyp').value;
+  var filTyp     = document.getElementById('filTyp').value;
+  var filOpravit = document.getElementById('filOpravit').value;
 
   // Filtrování
   FILTERED = [];
@@ -296,6 +306,15 @@ function render() {
     if(filTyp==='foto'  &&  r.video) continue;
     if(filZdroj && (r.zdroj||'neznámý')!==filZdroj) continue;
     if(filMisto && (r.misto||'') !== filMisto)        continue;
+    if(filOpravit) {
+      var bezLokace = !r.gps && !r.misto;
+      var bezPopisu = !r.popis || r.popis.trim()==='' || r.popis.indexOf('ze složky')>-1;
+      var bezObsahu = !r.obsah || r.obsah==='Ostatní';
+      if(filOpravit==='bez-lokace' && !bezLokace) continue;
+      if(filOpravit==='bez-popisu' && !bezPopisu) continue;
+      if(filOpravit==='bez-obsahu' && !bezObsahu) continue;
+      if(filOpravit==='vse' && !bezLokace && !bezPopisu && !bezObsahu) continue;
+    }
     if(q) {
       var hay=[r.popis,r.kat,r.obsah,r.gps,r.druh,r.nazev,r.zdroj].join(' ').toLowerCase();
       if(hay.indexOf(q)===-1) continue;
@@ -361,6 +380,10 @@ function init(data) {
   for(var i=0;i<DATA.length;i++) if(DATA[i].misto) mistaSetAll[DATA[i].misto]=1;
   MISTO_OPTIONS = Object.keys(mistaSetAll).sort();
 
+  // Sestav obrácenou mapu místo → GPS z GPS_NAZVY
+  MISTO_GPS = {};
+  Object.keys(GPS_NAZVY).forEach(function(gps){ MISTO_GPS[GPS_NAZVY[gps]] = gps; });
+
   // Místa dropdown — dynamicky z dat
   var mistaSet={};
   for(var i=0;i<DATA.length;i++){
@@ -370,7 +393,7 @@ function init(data) {
   var selMisto=document.getElementById('filMisto');
   var panama=[], kostarika=[], nikaragua=[], ostatni=[];
   Object.keys(mistaSet).sort().forEach(function(m){
-    var isPanama = m.indexOf('Panama')>-1 || m.indexOf('Emberá')>-1 || m.indexOf('Embera')>-1 || m.indexOf('Valle de Antón')>-1 || m.indexOf('San Lorenzo')>-1 || m.indexOf('Guna Yala')>-1 || m.indexOf('Senidub')>-1;
+    var isPanama = m.indexOf('Panama')>-1 || m.indexOf('Emberá')>-1 || m.indexOf('Embera')>-1 || m.indexOf('Valle de Antón')>-1 || m.indexOf('Valle del Anton')>-1 || m.indexOf('Anton')>-1 || m.indexOf('San Lorenzo')>-1 || m.indexOf('Guna Yala')>-1 || m.indexOf('Senidub')>-1;
     var isKostarika = m.indexOf('Kostarika')>-1 || m.indexOf('Cahuita')>-1 || m.indexOf('Liberia')>-1;
     if(isPanama) panama.push(m);
     else if(isKostarika) kostarika.push(m);
