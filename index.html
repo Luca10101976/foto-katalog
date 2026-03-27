@@ -124,6 +124,7 @@ var FILTERED = [];
 var PAGE = 0;
 var PAGE_SIZE = 48;
 var KAT_OPTIONS = ['Lidé','Příroda','Architektura','Ostatní'];
+var MISTO_OPTIONS = [];
 var ZDROJ_ICON = {'vlastní':'📱','screenshot':'🖥️','stažená':'🌐','neznámý':'❓'};
 var GPS_NAZVY = {
   '9.748900,-83.753400': 'Kostarika',
@@ -210,7 +211,10 @@ function cardHtml(r, i) {
     + '<div class="edit-mode">'
     + '<label>Popis</label><textarea id="e-popis-' + i + '">' + esc(r.popis||'') + '</textarea>'
     + '<label>Typ obsahu</label><select id="e-obsah-' + i + '">' + obsahOpts + '</select>'
-    + '<label>GPS místo</label><input type="text" id="e-gps-' + i + '" value="' + esc(r.gps||'') + '">'
+    + '<label>Místo</label><select id="e-misto-' + i + '">'
+    + '<option value="">— bez místa —</option>'
+    + MISTO_OPTIONS.map(function(m){ return '<option value="' + esc(m) + '"' + ((r.misto||'')=== m?' selected':'') + '>' + esc(m) + '</option>'; }).join('')
+    + '</select>'
     + '<label>Druh (rostlina / zvíře)</label><input type="text" id="e-druh-' + i + '" value="' + esc(r.druh||'') + '">'
     + '<label>Zdroj</label><select id="e-zdroj-' + i + '">' + zdrojOpts + '</select>'
     + '<label>Název souboru</label><input type="text" id="e-nazev-' + i + '" value="' + esc(r.nazev||'') + '">'
@@ -238,7 +242,8 @@ function saveEdit(i) {
     id:    r.id,
     popis: document.getElementById('e-popis-'+i).value,
     obsah: document.getElementById('e-obsah-'+i).value,
-    gps:   document.getElementById('e-gps-'+i).value,
+    gps:   r.gps || '',
+    misto: document.getElementById('e-misto-'+i).value,
     druh:  document.getElementById('e-druh-'+i).value,
     zdroj: document.getElementById('e-zdroj-'+i).value,
     nazev: document.getElementById('e-nazev-'+i).value
@@ -342,6 +347,11 @@ function init(data) {
   Object.keys(obsahSet).sort().forEach(function(o){
     var opt=document.createElement('option'); opt.value=o; opt.textContent=o; selObs.appendChild(opt);
   });
+
+  // Naplň globální MISTO_OPTIONS pro edit formy
+  var mistaSetAll={};
+  for(var i=0;i<DATA.length;i++) if(DATA[i].misto) mistaSetAll[DATA[i].misto]=1;
+  MISTO_OPTIONS = Object.keys(mistaSetAll).sort();
 
   // Místa dropdown — dynamicky z dat
   var mistaSet={};
