@@ -350,23 +350,27 @@ function init(data) {
     if(nazev) mistaSet[nazev]=1;
   }
   var selMisto=document.getElementById('filMisto');
-  var panama=[], kostarika=[], ostatni=[];
+  var panama=[], kostarika=[], nikaragua=[], ostatni=[];
   Object.keys(mistaSet).sort().forEach(function(m){
     if(m.indexOf('Panama')>-1) panama.push(m);
     else if(m.indexOf('Kostarika')>-1) kostarika.push(m);
+    else if(m.indexOf('Nikaragua')>-1) nikaragua.push(m);
     else ostatni.push(m);
   });
-  function addGroup(label, items){
+  function addGroup(label, items, strip){
     if(!items.length) return;
     var g=document.createElement('optgroup'); g.label=label;
     items.forEach(function(m){
-      var opt=document.createElement('option'); opt.value=m; opt.textContent=m.replace(', Panama','').replace(', Kostarika',''); g.appendChild(opt);
+      var opt=document.createElement('option'); opt.value=m;
+      opt.textContent=strip?m.replace(strip,''):m;
+      g.appendChild(opt);
     });
     selMisto.appendChild(g);
   }
-  addGroup('🇵🇦 Panama', panama);
-  addGroup('🇨🇷 Kostarika', kostarika);
-  addGroup('🌍 Ostatní', ostatni);
+  addGroup('🇵🇦 Panama', panama, ', Panama');
+  addGroup('🇨🇷 Kostarika', kostarika, ', Kostarika');
+  addGroup('🇳🇮 Nikaragua', nikaragua, '');
+  addGroup('🌍 Ostatní', ostatni, '');
 
   document.getElementById('subtitle').textContent=DATA.length+' fotek · AI katalogizace';
   render();
