@@ -362,8 +362,10 @@ function init(data) {
   var selMisto=document.getElementById('filMisto');
   var panama=[], kostarika=[], nikaragua=[], ostatni=[];
   Object.keys(mistaSet).sort().forEach(function(m){
-    if(m.indexOf('Panama')>-1) panama.push(m);
-    else if(m.indexOf('Kostarika')>-1) kostarika.push(m);
+    var isPanama = m.indexOf('Panama')>-1 || m.indexOf('Emberá')>-1 || m.indexOf('Embera')>-1 || m.indexOf('Valle de Antón')>-1 || m.indexOf('San Lorenzo')>-1 || m.indexOf('Guna Yala')>-1 || m.indexOf('Senidub')>-1;
+    var isKostarika = m.indexOf('Kostarika')>-1 || m.indexOf('Cahuita')>-1 || m.indexOf('Liberia')>-1;
+    if(isPanama) panama.push(m);
+    else if(isKostarika) kostarika.push(m);
     else if(m.indexOf('Nikaragua')>-1) nikaragua.push(m);
     else ostatni.push(m);
   });
