@@ -194,7 +194,7 @@ def convert_dng_to_jpeg(raw_bytes):
     except Exception as e:
         return None
 
-def resize_if_needed(image_bytes, max_bytes=4_000_000):
+def resize_if_needed(image_bytes, max_bytes=3_500_000):
     """Zmenší obrázek pokud je větší než max_bytes."""
     if len(image_bytes) <= max_bytes:
         return image_bytes
@@ -448,7 +448,7 @@ def main():
 
                 # Průběžně ukládej každých 10 fotek
                 if added % 10 == 0:
-                    KATALOG_FILE.write_text(json.dumps(katalog, ensure_ascii=False, indent=2), encoding="utf-8")
+                    KATALOG_FILE.write_text(json.dumps(katalog, ensure_ascii=False, separators=(',', ':')), encoding="utf-8")
                     print(f"    💾 Průběžně uloženo ({added} nových)")
 
                 time.sleep(0.3)  # Rate limiting
@@ -459,7 +459,7 @@ def main():
                 log.write(f"[{i}] CHYBA {f['nazev']}: {e}\n")
 
     # Ulož finální katalog
-    KATALOG_FILE.write_text(json.dumps(katalog, ensure_ascii=False, indent=2), encoding="utf-8")
+    KATALOG_FILE.write_text(json.dumps(katalog, ensure_ascii=False, separators=(',', ':')), encoding="utf-8")
     print(f"\n✅ Hotovo! Přidáno {added} nových fotek, {errors} chyb")
 
     # Push na GitHub
