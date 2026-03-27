@@ -26,6 +26,9 @@ IMAGE_MIMES = {
     "image/jpeg","image/jpg","image/png","image/heic",
     "image/heif","image/webp","image/tiff"
 }
+VIDEO_MIMES = {
+    "video/mp4","video/quicktime","video/x-msvideo","video/mpeg"
+}
 
 # ── Závislosti ────────────────────────────────────────────────────────────────
 def install(pkg):
@@ -135,7 +138,7 @@ def get_new_files(service, existing_ids):
     print(f"   📁 Nalezeno {len(folder_ids)} složek ve foto archivu")
 
     new_files = []
-    mime_query = " or ".join([f"mimeType='{m}'" for m in IMAGE_MIMES])
+    mime_query = " or ".join([f"mimeType='{m}'" for m in IMAGE_MIMES | VIDEO_MIMES])
     folder_cache = {}
     scanned = 0
 
@@ -438,7 +441,8 @@ def main():
                     "druh": result.get("druh", None),
                     "nazev": f["nazev"],
                     "zdroj": "vlastní",
-                    "heic": f["nazev"].lower().endswith(".heic")
+                    "heic": f["nazev"].lower().endswith(".heic"),
+                    "video": f["mime"] in VIDEO_MIMES
                 }
 
                 katalog.append(entry)

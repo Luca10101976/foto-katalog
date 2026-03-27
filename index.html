@@ -24,6 +24,10 @@
   .card.editing { box-shadow: 0 0 0 3px #0071e3, 0 8px 24px rgba(0,0,0,0.15); transform: none; }
   .thumb { width: 100%; height: 200px; object-fit: cover; background: #f0f0f0; display: block; }
   .thumb-placeholder { width: 100%; height: 200px; background: #f0f0f0; display: flex; align-items: center; justify-content: center; font-size: 48px; }
+  .thumb-wrap { position: relative; }
+  .video-badge { position: absolute; top: 50%; left: 50%; transform: translate(-50%,-50%); background: rgba(0,0,0,0.6); border-radius: 50%; width: 52px; height: 52px; display: flex; align-items: center; justify-content: center; font-size: 22px; pointer-events: none; }
+  .btn-play { flex: 1; background: #ff3b30; color: white; border: none; padding: 9px 14px; border-radius: 10px; font-size: 13px; font-weight: 600; cursor: pointer; text-decoration: none; display: flex; align-items: center; justify-content: center; gap: 6px; }
+  .btn-play:hover { background: #cc2900; }
   .gps-banner { background: linear-gradient(135deg, #ff3b30, #ff6b35); color: white; padding: 8px 16px; font-size: 13px; font-weight: 600; display: flex; align-items: center; gap: 6px; }
   .card-body { padding: 14px 16px 16px; }
   .desc { font-size: 14px; font-weight: 600; color: #1d1d1f; line-height: 1.4; margin-bottom: 10px; }
@@ -158,9 +162,11 @@ function cardHtml(r, i) {
   var thumbUrl = r.id ? 'https://drive.google.com/thumbnail?id=' + r.id + '&sz=w300' : '';
   var fileUrl  = r.id ? 'https://drive.google.com/file/d/' + r.id + '/view' : '#';
 
-  var thumbHtml = thumbUrl
-    ? '<img class="thumb" src="' + thumbUrl + '" alt="" loading="lazy" onerror="this.parentNode.innerHTML=\'<div class=\\\'thumb-placeholder\\\'>🖼️</div>\'">'
-    : '<div class="thumb-placeholder">🖼️</div>';
+  var isVideo = r.video === true;
+  var thumbInner = thumbUrl
+    ? '<img class="thumb" src="' + thumbUrl + '" alt="" loading="lazy" onerror="this.parentNode.innerHTML=\'<div class=\\\'thumb-placeholder\\\'>' + (isVideo?'🎬':'🖼️') + '</div>\'">'
+    : '<div class="thumb-placeholder">' + (isVideo ? '🎬' : '🖼️') + '</div>';
+  var thumbHtml = '<div class="thumb-wrap">' + thumbInner + (isVideo ? '<div class="video-badge">▶️</div>' : '') + '</div>';
 
   var gpsLabel = r.misto || (r.gps ? (GPS_NAZVY[r.gps] || r.gps) : '');
   var gpsBanner = gpsLabel ? '<div class="gps-banner">📍 ' + esc(gpsLabel) + '</div>' : '';
@@ -192,7 +198,9 @@ function cardHtml(r, i) {
     + '<div class="tags">' + tags + '</div>'
     + (r.nazev ? '<div class="meta">📄 ' + esc(r.nazev) + '</div>' : '')
     + '<div class="btns">'
-    + '<a class="btn-open" href="' + fileUrl + '" target="_blank">🔍 Otevřít fotku</a>'
+    + (isVideo
+        ? '<a class="btn-play" href="' + fileUrl + '" target="_blank">▶ Přehrát video</a>'
+        : '<a class="btn-open" href="' + fileUrl + '" target="_blank">🔍 Otevřít fotku</a>')
     + '<button class="btn-edit" onclick="startEdit(' + i + ')">✏️</button>'
     + '</div></div>'
     + '<div class="edit-mode">'
