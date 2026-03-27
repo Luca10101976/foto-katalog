@@ -99,6 +99,11 @@
   <select id="filMisto" onchange="render()">
     <option value="">🌍 Všechna místa</option>
   </select>
+  <select id="filTyp" onchange="render()">
+    <option value="">Vše — foto i video</option>
+    <option value="foto">🖼️ Jen fotky</option>
+    <option value="video">🎬 Jen videa</option>
+  </select>
   <select id="filZdroj" onchange="render()">
     <option value="">Všechny zdroje</option>
     <option value="vlastní">📱 Vlastní fotky</option>
@@ -278,6 +283,7 @@ function render() {
   var filGps   = document.getElementById('filGps').value;
   var filZdroj = document.getElementById('filZdroj').value;
   var filMisto = document.getElementById('filMisto').value;
+  var filTyp   = document.getElementById('filTyp').value;
 
   // Filtrování
   FILTERED = [];
@@ -286,6 +292,8 @@ function render() {
     if(filObs   && r.obsah!==filObs) continue;
     if(filGps==='ano' && !r.gps && !r.misto) continue;
     if(filGps==='ne'  && (r.gps || r.misto)) continue;
+    if(filTyp==='video' && !r.video) continue;
+    if(filTyp==='foto'  &&  r.video) continue;
     if(filZdroj && (r.zdroj||'neznámý')!==filZdroj) continue;
     if(filMisto && (r.misto||'') !== filMisto)        continue;
     if(q) {
