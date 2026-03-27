@@ -165,11 +165,8 @@ function cardHtml(r, i) {
   var fileUrl  = r.id ? 'https://drive.google.com/file/d/' + r.id + '/view' : '#';
 
   var isVideo = r.video === true;
-  var videoPlaceholder = '<div class="thumb-video-placeholder">🎬<span>Video</span></div>';
   var thumbInner = isVideo
-    ? (thumbUrl
-        ? '<img class="thumb" src="' + thumbUrl + '" alt="" loading="lazy" onerror="this.style.display=\'none\';this.parentNode.insertAdjacentHTML(\'afterbegin\',\'' + videoPlaceholder.replace(/'/g,"\\'") + '\')">'
-        : videoPlaceholder)
+    ? '<div class="thumb-video-placeholder">🎬<span>Video</span></div>'
     : (thumbUrl
         ? '<img class="thumb" src="' + thumbUrl + '" alt="" loading="lazy" onerror="this.parentNode.innerHTML=\'<div class=\\\'thumb-placeholder\\\'>🖼️</div>\'">'
         : '<div class="thumb-placeholder">🖼️</div>');
