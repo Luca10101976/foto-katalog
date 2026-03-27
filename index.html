@@ -26,6 +26,8 @@
   .thumb-placeholder { width: 100%; height: 200px; background: #f0f0f0; display: flex; align-items: center; justify-content: center; font-size: 48px; }
   .thumb-wrap { position: relative; }
   .video-badge { position: absolute; top: 50%; left: 50%; transform: translate(-50%,-50%); background: rgba(0,0,0,0.6); border-radius: 50%; width: 52px; height: 52px; display: flex; align-items: center; justify-content: center; font-size: 22px; pointer-events: none; }
+  .thumb-video-placeholder { width: 100%; height: 200px; background: #1d1d1f; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px; color: white; font-size: 40px; }
+  .thumb-video-placeholder span { font-size: 13px; color: #a1a1a6; }
   .btn-play { flex: 1; background: #ff3b30; color: white; border: none; padding: 9px 14px; border-radius: 10px; font-size: 13px; font-weight: 600; cursor: pointer; text-decoration: none; display: flex; align-items: center; justify-content: center; gap: 6px; }
   .btn-play:hover { background: #cc2900; }
   .gps-banner { background: linear-gradient(135deg, #ff3b30, #ff6b35); color: white; padding: 8px 16px; font-size: 13px; font-weight: 600; display: flex; align-items: center; gap: 6px; }
@@ -163,9 +165,14 @@ function cardHtml(r, i) {
   var fileUrl  = r.id ? 'https://drive.google.com/file/d/' + r.id + '/view' : '#';
 
   var isVideo = r.video === true;
-  var thumbInner = thumbUrl
-    ? '<img class="thumb" src="' + thumbUrl + '" alt="" loading="lazy" onerror="this.parentNode.innerHTML=\'<div class=\\\'thumb-placeholder\\\'>' + (isVideo?'🎬':'🖼️') + '</div>\'">'
-    : '<div class="thumb-placeholder">' + (isVideo ? '🎬' : '🖼️') + '</div>';
+  var videoPlaceholder = '<div class="thumb-video-placeholder">🎬<span>Video</span></div>';
+  var thumbInner = isVideo
+    ? (thumbUrl
+        ? '<img class="thumb" src="' + thumbUrl + '" alt="" loading="lazy" onerror="this.style.display=\'none\';this.parentNode.insertAdjacentHTML(\'afterbegin\',\'' + videoPlaceholder.replace(/'/g,"\\'") + '\')">'
+        : videoPlaceholder)
+    : (thumbUrl
+        ? '<img class="thumb" src="' + thumbUrl + '" alt="" loading="lazy" onerror="this.parentNode.innerHTML=\'<div class=\\\'thumb-placeholder\\\'>🖼️</div>\'">'
+        : '<div class="thumb-placeholder">🖼️</div>');
   var thumbHtml = '<div class="thumb-wrap">' + thumbInner + (isVideo ? '<div class="video-badge">▶️</div>' : '') + '</div>';
 
   var gpsLabel = r.misto || (r.gps ? (GPS_NAZVY[r.gps] || r.gps) : '');
