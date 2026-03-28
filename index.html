@@ -110,13 +110,11 @@
     <option value="screenshot">🖥️ Screenshoty</option>
     <option value="stažená">🌐 Stažené</option>
     <option value="neznámý">❓ Neznámý</option>
-  </select>
-  <select id="filOpravit" onchange="render()" style="border-color:#ff9500;">
-    <option value="">✅ Vše</option>
-    <option value="bez-lokace">📍 Bez lokace</option>
-    <option value="bez-popisu">📝 Bez popisu</option>
-    <option value="bez-obsahu">🏷️ Bez obsahu</option>
-    <option value="vse">🔧 Vše k opravě</option>
+    <optgroup label="──────────────"></optgroup>
+    <option value="opravit:bez-lokace">📍 Bez lokace</option>
+    <option value="opravit:bez-popisu">📝 Bez popisu</option>
+    <option value="opravit:bez-obsahu">🏷️ Bez obsahu</option>
+    <option value="opravit:vse">🔧 Vše k opravě</option>
   </select>
   <span class="count" id="count"></span>
 </div>
@@ -159,7 +157,12 @@ var GPS_NAZVY = {
   '9.166700,-79.666700': 'Emberá, Panama',
   '8.700000,-80.000000': 'El Níspero, Panama',
   '9.557700,-79.651900': 'Portobelo, Panama',
-  '8.578100,-80.139500': 'El Valle de Antón, Panama',
+  '8.578100,-80.139500': 'Valle de Antón, Panama',
+  '9.250000,-79.966700': 'San Lorenzo, Panama',
+  '9.733300,-82.833300': 'Cahuita, Kostarika',
+  '10.633300,-85.433300': 'Guanacaste - Liberia',
+  '9.000000,-80.000000': 'Panama',
+  '11.216700,-85.916700': 'Nikaragua, přechod hranice',
 };
 var PRIRODA_OBSAH = ['Zvíře','Mořský život','Příroda / Rostliny','Vodopád','Hory / Krajina'];
 // Apps Script URL pro ukládání editací
@@ -293,7 +296,8 @@ function render() {
   var filZdroj = document.getElementById('filZdroj').value;
   var filMisto = document.getElementById('filMisto').value;
   var filTyp     = document.getElementById('filTyp').value;
-  var filOpravit = document.getElementById('filOpravit').value;
+  var filOpravit = filZdroj.startsWith('opravit:') ? filZdroj.slice(8) : '';
+  if(filOpravit) filZdroj = '';
 
   // Filtrování
   FILTERED = [];
