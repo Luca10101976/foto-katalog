@@ -157,7 +157,7 @@ def get_new_files(service, existing_ids):
             query = f"'{folder_id}' in parents and trashed=false and ({mime_query})"
             resp = service.files().list(
                 q=query,
-                fields="nextPageToken, files(id, name, mimeType, size)",
+                fields="nextPageToken, files(id, name, mimeType, size, imageMediaMetadata)",
                 pageSize=1000,
                 pageToken=page_token
             ).execute()
@@ -170,11 +170,17 @@ def get_new_files(service, existing_ids):
                     continue
                 if int(f.get("size", 0)) < 50000:
                     continue
+                # GPS z Drive metadata
+                drive_gps = ""
+                loc = (f.get("imageMediaMetadata") or {}).get("location", {})
+                if loc and loc.get("latitude") and loc.get("longitude"):
+                    drive_gps = f"{loc['latitude']:.6f},{loc['longitude']:.6f}"
                 new_files.append({
                     "id": f["id"],
                     "nazev": f["name"],
                     "kat": folder_name,
-                    "mime": f["mimeType"]
+                    "mime": f["mimeType"],
+                    "drive_gps": drive_gps
                 })
 
             page_token = resp.get("nextPageToken")
@@ -243,7 +249,21 @@ def heic_to_jpeg(raw_data):
 def get_image_bytes(service, file_id, mime_type, filename=""):
     is_raw = filename.lower().endswith(('.dng', '.cr2', '.nef', '.arw', '.raf'))
     is_heic = filename.lower().endswith(('.heic', '.heif'))
+    is_video = mime_type in VIDEO_MIMES
     import urllib.request
+
+    # Pro video použij VŽDY jen thumbnail — nikdy nestahuj celý soubor
+    if is_video:
+        try:
+            url = f"https://drive.google.com/thumbnail?id={file_id}&sz=w1600"
+            req = urllib.request.Request(url, headers={"User-Agent": "Mozilla/5.0"})
+            with urllib.request.urlopen(req, timeout=15) as r:
+                data = r.read()
+            if len(data) > 1000 and (data[:3] == b'\xff\xd8\xff' or data[:8] == b'\x89PNG\r\n\x1a\n'):
+                return data, "image/jpeg"
+        except:
+            pass
+        return None, None
 
     # Pro JPEG/PNG/WebP zkus nejdřív thumbnail (rychlejší, menší, funguje i pro sdílené složky)
     if not is_raw and not is_heic:
@@ -421,8 +441,8 @@ def main():
                     errors += 1
                     continue
 
-                # GPS z EXIF (před resize, kvůli zachování EXIF dat)
-                gps = extract_gps(img_data)
+                # GPS: nejdřív Drive metadata, pak EXIF
+                gps = f.get("drive_gps") or extract_gps(img_data)
 
                 # Zmenši pokud je obrázek příliš velký pro Claude API
                 img_data = resize_if_needed(img_data)
