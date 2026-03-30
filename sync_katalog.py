@@ -398,6 +398,41 @@ def extract_gps(image_data):
         pass
     return None
 
+# ── Přiřazení misto z názvu složky + GPS ──────────────────────────────────────
+def folder_to_misto(folder_name, gps=""):
+    """Z názvu složky (a GPS zálohy) odvodí čisté jméno místa pro dropdown."""
+    f = folder_name.strip()
+    fl = f.lower()
+
+    # Klíčová slova pro zemi v názvu složky
+    is_nik = any(k in fl for k in ("nikaragua", "nicaragua"))
+    is_pan = any(k in fl for k in ("panama", "panamá"))
+    is_cr  = any(k in fl for k in ("kostarika", "costa rica"))
+
+    # Záloha: detekce země z GPS souřadnic
+    if not (is_nik or is_pan or is_cr) and gps:
+        try:
+            lat, lon = map(float, gps.split(","))
+            if lat > 10.5:
+                is_nik = True
+            elif lon < -84 or (lat > 8 and lon < -82.5):
+                is_cr = True
+            else:
+                is_pan = True
+        except:
+            pass
+
+    # Pokud název složky NEOBSAHUJE zemi, přidáme prefix
+    if is_nik and "nikaragua" not in fl and "nicaragua" not in fl:
+        return "Nikaragua, " + f
+    if is_pan and "panama" not in fl and "panamá" not in fl:
+        return "Panama, " + f
+    if is_cr and "kostarika" not in fl and "costa rica" not in fl:
+        return "Kostarika, " + f
+
+    # Název složky obsahuje zemi nebo ji neznáme — vrátíme jak je
+    return f
+
 # ── Hlavní funkce ─────────────────────────────────────────────────────────────
 def main():
     print("🚀 Spouštím sync_katalog.py")
@@ -456,6 +491,7 @@ def main():
                     "id": f["id"],
                     "popis": result.get("popis", ""),
                     "kat": kat,
+                    "misto": folder_to_misto(f["kat"], gps or ""),
                     "obsah": result.get("obsah", "Ostatní"),
                     "gps": gps or "",
                     "druh": result.get("druh", None),
