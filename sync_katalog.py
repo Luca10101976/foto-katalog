@@ -422,13 +422,13 @@ def folder_to_misto(folder_name, gps=""):
         except:
             pass
 
-    # Pokud název složky NEOBSAHUJE zemi, přidáme prefix
+    # Pokud název složky NEOBSAHUJE zemi, přidáme suffix (formát: Město, Země)
     if is_nik and "nikaragua" not in fl and "nicaragua" not in fl:
-        return "Nikaragua, " + f
+        return f + ", Nikaragua"
     if is_pan and "panama" not in fl and "panamá" not in fl:
-        return "Panama, " + f
+        return f + ", Panama"
     if is_cr and "kostarika" not in fl and "costa rica" not in fl:
-        return "Kostarika, " + f
+        return f + ", Kostarika"
 
     # Název složky obsahuje zemi nebo ji neznáme — vrátíme jak je
     return f
