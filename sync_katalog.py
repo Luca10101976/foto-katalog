@@ -399,12 +399,14 @@ def extract_gps(image_data):
     return None
 
 # ── Přiřazení misto z názvu složky + GPS ──────────────────────────────────────
+import re as _re
+
 def folder_to_misto(folder_name, gps=""):
     """Z názvu složky (a GPS zálohy) odvodí čisté jméno místa pro dropdown."""
     f = folder_name.strip()
     fl = f.lower()
 
-    # Klíčová slova pro zemi v názvu složky
+    # Detekce země
     is_nik = any(k in fl for k in ("nikaragua", "nicaragua"))
     is_pan = any(k in fl for k in ("panama", "panamá"))
     is_cr  = any(k in fl for k in ("kostarika", "costa rica"))
@@ -422,15 +424,37 @@ def folder_to_misto(folder_name, gps=""):
         except:
             pass
 
-    # Pokud název složky NEOBSAHUJE zemi, přidáme suffix (formát: Město, Země)
-    if is_nik and "nikaragua" not in fl and "nicaragua" not in fl:
-        return f + ", Nikaragua"
-    if is_pan and "panama" not in fl and "panamá" not in fl:
-        return f + ", Panama"
-    if is_cr and "kostarika" not in fl and "costa rica" not in fl:
-        return f + ", Kostarika"
+    # Parsování složek ve formátu "Costa Rica, Město, ..., datum"
+    # → extrahuje konkrétní název místa
+    def extract_city(name, country_keyword):
+        # Odstraň datum (XX.XX.XXXX) z konce
+        name = _re.sub(r',?\s*\d{2}\.\d{2}\.\d{4}$', '', name).strip()
+        # Rozdělení po čárce, odstraň část se zemí
+        parts = [p.strip() for p in name.split(',')]
+        city_parts = [p for p in parts if country_keyword.lower() not in p.lower() and p]
+        if city_parts:
+            return ' / '.join(city_parts)
+        return None
 
-    # Název složky obsahuje zemi nebo ji neznáme — vrátíme jak je
+    if is_cr:
+        city = extract_city(f, 'costa rica') or extract_city(f, 'kostarika')
+        if city and city.lower() not in ('kostarika', 'costa rica'):
+            return city + ', Kostarika'
+        return 'Kostarika'
+
+    if is_nik:
+        city = extract_city(f, 'nikaragua') or extract_city(f, 'nicaragua')
+        if city and city.lower() not in ('nikaragua', 'nicaragua'):
+            return city + ', Nikaragua'
+        return 'Nikaragua'
+
+    if is_pan:
+        city = extract_city(f, 'panama') or extract_city(f, 'panamá')
+        if city and city.lower() not in ('panama', 'panamá'):
+            return city + ', Panama'
+        return 'Panama'
+
+    # Neznámá země — vrátíme jak je
     return f
 
 # ── Hlavní funkce ─────────────────────────────────────────────────────────────
